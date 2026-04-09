@@ -1,4 +1,6 @@
 #include "get_next_line.h"
+#include "get_next_line_bonus.h"
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,6 +83,47 @@ void create_files(void)
 	write(fd, "line1\nline2\nline3\n", 18); close(fd);
 }
 
+// // ANSI Color Codes
+// #define G "\033[0;32m"
+// #define R "\033[0;31m"
+#define Y "\033[0;33m"
+#define RESET "\033[0m"
+
+void test_bonus_colored()
+{
+    int fds[3];
+    char *lines[3];
+    int i;
+
+    // Create 3 files with different content
+    system("echo 'File 1 - Line 1' > f1.txt");
+    system("echo 'File 2 - Line 1' > f2.txt");
+    system("echo 'File 3 - Line 1' > f3.txt");
+
+    fds[0] = open("f1.txt", O_RDONLY);
+    fds[1] = open("f2.txt", O_RDONLY);
+    fds[2] = open("f3.txt", O_RDONLY);
+
+    printf("\n%s--- GNL BONUS TESTER ---%s\n", Y, RESET);
+
+    for (i = 0; i < 3; i++)
+    {
+        lines[i] = get_next_line(fds[i]);
+        if (lines[i])
+        {
+            printf("FD [%d]: %s[OK]%s -> %s", fds[i], GREEN, RESET, lines[i]);
+            free(lines[i]);
+        }
+        else
+            printf("FD [%d]: %s[NULL/FAIL]%s\n", fds[i], RED, RESET);
+    }
+
+    // Closing and cleanup
+    close(fds[0]); close(fds[1]); close(fds[2]);
+    system("rm f1.txt f2.txt f3.txt");
+    printf("%s------------------------%s\n", Y, RESET);
+}
+
 int main(void)
 {
 	create_files();
@@ -108,6 +151,10 @@ int main(void)
 
 	// Limpieza de archivos temporales
 	system("rm empty.txt single_char.txt no_newline.txt only_newlines.txt multiple_lines.txt");
+
+	// test_gnl_bonus();
+	test_bonus_colored();
+	// system("rm file1.txt file2.txt file3.txt");
 
 	return 0;
 }
