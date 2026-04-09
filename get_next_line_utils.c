@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: betferna <betferna@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/09 11:45:12 by betferna          #+#    #+#             */
+/*   Updated: 2026/04/09 11:51:41 by betferna         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
@@ -15,7 +27,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	p = (char *)malloc(len + 1);
 	if (!p)
 		return (NULL);
-	while (i < len)
+	while (i < (int)len)
 	{
 		p[i] = s[start + i];
 		i++;
