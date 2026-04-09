@@ -1,24 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: betferna <betferna@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/09 11:45:04 by betferna          #+#    #+#             */
+/*   Updated: 2026/04/09 15:29:53 by betferna         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
-char	*get_next_line(int fd)
+char	*free_storage(char *storage)
 {
-	static char	*storage;
-	char		*buffer;
-	char		*line;
-
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	buffer = malloc((sizeof(char) * BUFFER_SIZE + 1));
-	if (!buffer)
-		return (NULL);
-	if (!storage)
-		storage = ft_strdup("");
-	storage = ft_read(fd, storage, buffer);
-	if (!storage)
-		return (NULL);
-	line = find_newline(storage);
-	storage = left_line(storage);
-	return (line);
+	if (storage)
+	{
+		free(storage);
+		storage = NULL;
+	}
+	return (NULL);
 }
 
 char	*ft_read(int fd, char *storage, char *buffer)
@@ -43,16 +44,6 @@ char	*ft_read(int fd, char *storage, char *buffer)
 	if (!storage || *storage == '\0')
 		storage = free_storage(storage);
 	return (storage);
-}
-
-char	*free_storage(char *storage)
-{
-	if (storage)
-	{
-		free(storage);
-		storage = NULL;
-	}
-	return (NULL);
 }
 
 char	*find_newline(char *st)
@@ -97,16 +88,23 @@ char	*left_line(char *storage)
 	return (temp);
 }
 
-// int	main(void)
-// {
-// 	int fd;
-// 	char *line;
-// 	fd = open("archivo.txt", O_RDONLY);
-// 	while ((line = get_next_line(fd)) != NULL)
-// 	{
-// 		printf("%s", line);
-// 		free(line);
-// 	}
-// 	close(fd);
-// 	return (0);
-// }
+char	*get_next_line(int fd)
+{
+	static char	*storage;
+	char		*buffer;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buffer = malloc((sizeof(char) * BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
+	if (!storage)
+		storage = ft_strdup("");
+	storage = ft_read(fd, storage, buffer);
+	if (!storage)
+		return (NULL);
+	line = find_newline(storage);
+	storage = left_line(storage);
+	return (line);
+}
