@@ -34,7 +34,11 @@ char	*ft_read(int fd, char *storage, char *buffer)
 		if (bytes == 0)
 			break ;
 		else if (bytes == -1 || !storage)
+		{
 			storage = free_storage(storage);
+			free(buffer);
+			return(NULL);
+		}
 		buffer[bytes] = '\0';
 		temp = storage;
 		storage = ft_strjoin(temp, buffer);
