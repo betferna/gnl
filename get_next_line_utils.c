@@ -1,111 +1,127 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: betferna <betferna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/09 11:45:12 by betferna          #+#    #+#             */
-/*   Updated: 2026/04/09 11:51:41 by betferna         ###   ########.fr       */
+/*   Created: 2026/04/09 11:45:04 by betferna          #+#    #+#             */
+/*   Updated: 2026/04/13 15:44:40 by betferna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+char	*free_storage(char *storage)
 {
-	char	*p;
+	if (storage)
+	{
+		free(storage);
+		storage = NULL;
+	}
+	return (NULL);
+}
+
+char	*find_newline(char *st)
+{
+	char	*line;
 	int		i;
-
-	i = 0;
-	if (!s)
-		return (NULL);
-	if (start >= ft_strlen(s))
-		return (ft_strdup(""));
-	if (len > (ft_strlen(s)) - (size_t)start)
-		len = ft_strlen(s) - (size_t)start;
-	p = (char *)malloc(len + 1);
-	if (!p)
-		return (NULL);
-	while (i < (int)len)
-	{
-		p[i] = s[start + i];
-		i++;
-	}
-	p[len] = '\0';
-	return (p);
-}
-
-size_t	ft_strlen(const char *str)
-{
-	int	x;
-
-	x = 0;
-	while (str[x] != '\0')
-	{
-		x++;
-	}
-	return (x);
-}
-
-char	*ft_strjoin(char const *s1, char const *s2)
-{
 	int		len;
-	char	*concat;
-	int		i;
-	int		j;
 
-	if (!s1 || !s2)
+	len = ft_strlen(st) + 2;
+	if (!st)
 		return (NULL);
-	len = ft_strlen((char *)s1) + ft_strlen((char *)s2);
-	concat = (char *)malloc(sizeof(char) * (len + 1));
-	if (!concat)
+	line = malloc(sizeof(char) * len);
+	if (!line)
 		return (NULL);
 	i = 0;
-	while (s1[i])
+	while (st[i] && st[i] != '\n')
 	{
-		concat[i] = s1[i];
+		line[i] = st[i];
 		i++;
 	}
-	j = 0;
-	while (s2[j])
-	{
-		concat[i + j] = s2[j];
-		j++;
-	}
-	concat[i + j] = '\0';
-	return (concat);
+	if (st[i] == '\n')
+		line[i++] = '\n';
+	line[i] = '\0';
+	return (line);
 }
 
-int	newline(char *st)
+char	*left_line(char *storage)
 {
-	int	i;
-
-	i = 0;
-	while (st[i])
-	{
-		if (st[i] == '\n')
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-char	*ft_strdup(const char *s)
-{
-	char	*str;
-	int		len;
 	int		i;
+	char	*temp;
 
 	i = 0;
-	len = ft_strlen(s) + 1;
-	str = (char *)malloc(sizeof(char) * len);
-	if (str == NULL)
-		return (NULL);
-	while (i < len)
-	{
-		str[i] = s[i];
+	while (storage[i] && storage[i] != '\n')
 		i++;
+	if (!storage[i] || !storage[i + 1])
+	{
+		free(storage);
+		return (NULL);
 	}
-	return (str);
+	temp = ft_substr(storage, i + 1, ft_strlen(storage));
+	free(storage);
+	return (temp);
 }
+
+char	*ft_read(int fd, char *storage, char *buffer)
+{
+	int		bytes;
+	char	*temp;
+
+	bytes = 0;
+	while (!newline(storage))
+	{
+		bytes = read(fd, buffer, BUFFER_SIZE);
+		if (bytes == 0)
+			break ;
+		else if (bytes == -1 || !storage)
+		{
+			storage = free_storage(storage);
+			free(buffer);
+			return (NULL);
+		}
+		buffer[bytes] = '\0';
+		temp = storage;
+		storage = ft_strjoin(temp, buffer);
+		free(temp);
+	}
+	free(buffer);
+	if (!storage || *storage == '\0')
+		storage = free_storage(storage);
+	return (storage);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*storage;
+	char		*buffer;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buffer = malloc((sizeof(char) * BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
+	if (!storage)
+		storage = ft_strdup("");
+	storage = ft_read(fd, storage, buffer);
+	if (!storage)
+		return (NULL);
+	line = find_newline(storage);
+	storage = left_line(storage);
+	return (line);
+}
+
+// int main()
+// {
+// 	char *line;
+// 	int fd = open("file.txt", O_RDWR | O_CREAT);
+// 	line = get_next_line(fd);
+// 	printf("%s", line);
+// 	free(line);
+// 	line = NULL;
+// 	close(fd);
+// 	// remove("file.txt");
+// 	return(0);
+// }
